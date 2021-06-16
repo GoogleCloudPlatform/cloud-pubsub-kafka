@@ -124,6 +124,8 @@ Connector supports the following configs:
 | cps.endpoint | String | "pubsub.googleapis.com:443" | The [Cloud Pub/Sub endpoint](https://cloud.google.com/pubsub/docs/reference/service_apis_overview#service_endpoints) to use. |
 | maxBufferSize | Integer | 100 | The maximum number of messages that can be received for the messages on a topic partition before publishing them to Cloud Pub/Sub. |
 | maxBufferBytes | Long | 10000000 | The maximum number of bytes that can be received for the messages on a topic partition before publishing them to Cloud Pub/Sub. |
+| maxOutstandingRequestBytes | Long | Long.MAX_VALUE | The maximum number of outstanding bytes for incomplete and unsent messages before the publisher will block further publishing. |
+| maxOutstandingElementCount | Long | Long.MAX_VALUE | The maximum number of outstanding elements for incomplete and unsent messages before the publisher will block further publishing. |
 | maxDelayThresholdMs | Integer | 100 | The maximum amount of time to wait to reach maxBufferSize or maxBufferBytes before publishing outstanding messages to Cloud Pub/Sub. |
 | maxRequestTimeoutMs | Integer | 10000 | The timeout for individual publish requests to Cloud Pub/Sub. |
 | maxTotalTimeoutMs | Integer | 60000| The total timeout for a call to publish (including retries) to Cloud Pub/Sub. |

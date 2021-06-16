@@ -41,6 +41,8 @@ public class CloudPubSubSinkConnector extends SinkConnector {
 
   public static final String MAX_BUFFER_SIZE_CONFIG = "maxBufferSize";
   public static final String MAX_BUFFER_BYTES_CONFIG = "maxBufferBytes";
+  public static final String MAX_OUTSTANDING_REQUEST_BYTES = "maxOutstandingRequestBytes";
+  public static final String MAX_OUTSTANDING_ELEMENT_COUNT = "maxOutstandingElementCount";
   public static final String MAX_DELAY_THRESHOLD_MS = "delayThresholdMs";
   public static final String MAX_REQUEST_TIMEOUT_MS = "maxRequestTimeoutMs";
   public static final String MAX_TOTAL_TIMEOUT_MS = "maxTotalTimeoutMs";
@@ -163,6 +165,18 @@ public class CloudPubSubSinkConnector extends SinkConnector {
             Importance.MEDIUM,
             "The maximum number of bytes that can be received for the messages on a topic "
                 + "partition before publishing the messages to Cloud Pub/Sub.")
+        .define(MAX_OUTSTANDING_REQUEST_BYTES,
+            Type.LONG,
+            Long.MAX_VALUE,
+            Importance.MEDIUM,
+            "The maximum outstanding bytes from incomplete requests before the task blocks."
+        )
+        .define(MAX_OUTSTANDING_ELEMENT_COUNT,
+            Type.LONG,
+            Long.MAX_VALUE,
+            Importance.MEDIUM,
+            "The maximum outstanding incomplete messages before the task blocks."
+        )
         .define(
             MAX_DELAY_THRESHOLD_MS,
             Type.INT,
