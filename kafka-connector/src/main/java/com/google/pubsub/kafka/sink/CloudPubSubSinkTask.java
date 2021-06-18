@@ -73,7 +73,7 @@ public class CloudPubSubSinkTask extends SinkTask {
   private long maxBufferSize;
   private long maxBufferBytes;
   private long maxOutstandingRequestBytes;
-  private long maxOutstandingElementCount;
+  private long maxOutstandingMessages;
   private int maxDelayThresholdMs;
   private int maxRequestTimeoutMs;
   private int maxTotalTimeoutMs;
@@ -122,8 +122,8 @@ public class CloudPubSubSinkTask extends SinkTask {
     maxBufferBytes = (Long) validatedProps.get(CloudPubSubSinkConnector.MAX_BUFFER_BYTES_CONFIG);
     maxOutstandingRequestBytes =
         (Long) validatedProps.get(CloudPubSubSinkConnector.MAX_OUTSTANDING_REQUEST_BYTES);
-    maxOutstandingElementCount =
-        (Long) validatedProps.get(CloudPubSubSinkConnector.MAX_OUTSTANDING_ELEMENT_COUNT);
+    maxOutstandingMessages =
+        (Long) validatedProps.get(CloudPubSubSinkConnector.MAX_OUTSTANDING_MESSAGES);
     maxDelayThresholdMs =
         (Integer) validatedProps.get(CloudPubSubSinkConnector.MAX_DELAY_THRESHOLD_MS);
     maxRequestTimeoutMs =
@@ -403,7 +403,7 @@ public class CloudPubSubSinkTask extends SinkTask {
                     .setRequestByteThreshold(maxBufferBytes)
                     .setFlowControlSettings(FlowControlSettings.newBuilder()
                         .setMaxOutstandingRequestBytes(maxOutstandingRequestBytes)
-                        .setMaxOutstandingElementCount(maxOutstandingElementCount)
+                        .setMaxOutstandingElementCount(maxOutstandingMessages)
                         .setLimitExceededBehavior(FlowController.LimitExceededBehavior.Block)
                         .build())
                     .build())
