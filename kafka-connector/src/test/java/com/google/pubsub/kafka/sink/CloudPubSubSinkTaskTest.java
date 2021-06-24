@@ -354,6 +354,7 @@ public class CloudPubSubSinkTaskTest {
     when(publisher.publish(any(PubsubMessage.class))).thenReturn(goodFuture);
     task.put(records);
     task.flush(partitionOffsets);
+    verify(publisher, times(1)).publishAllOutstanding();
     verify(publisher, times(2)).publish(any(PubsubMessage.class));
     verify(goodFuture, times(2)).addListener(any(Runnable.class), any(Executor.class));
   }
@@ -372,6 +373,7 @@ public class CloudPubSubSinkTaskTest {
     when(publisher.publish(any(PubsubMessage.class))).thenReturn(badFuture);
     task.put(records);
     task.flush(partitionOffsets);
+    verify(publisher, times(1)).publishAllOutstanding();
     verify(publisher, times(1)).publish(any(PubsubMessage.class));
     verify(badFuture, times(1)).addListener(any(Runnable.class), any(Executor.class));
   }
@@ -602,6 +604,7 @@ public class CloudPubSubSinkTaskTest {
     records = getSampleRecords();
     task.put(records);
     task.flush(partitionOffsets);
+    verify(publisher, times(2)).publishAllOutstanding();
     verify(publisher, times(4)).publish(any(PubsubMessage.class));
     verify(badFuture, times(2)).addListener(any(Runnable.class), any(Executor.class));
     verify(goodFuture, times(2)).addListener(any(Runnable.class), any(Executor.class));

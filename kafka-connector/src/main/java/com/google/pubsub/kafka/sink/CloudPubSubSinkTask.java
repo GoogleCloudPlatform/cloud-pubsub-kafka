@@ -334,6 +334,8 @@ public class CloudPubSubSinkTask extends SinkTask {
 
   @Override
   public void flush(Map<TopicPartition, OffsetAndMetadata> partitionOffsets) {
+    // Publish the incomplete batch now instead of waiting for the maxDelayThresholdMs
+    publisher.publishAllOutstanding();
     log.debug("Flushing...");
     // Process results of all the outstanding futures specified by each TopicPartition.
     for (Map.Entry<TopicPartition, OffsetAndMetadata> partitionOffset :
