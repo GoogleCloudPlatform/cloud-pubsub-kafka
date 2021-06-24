@@ -19,6 +19,8 @@ import com.google.api.core.ApiFuture;
 import com.google.api.core.ApiFutures;
 import com.google.api.core.SettableApiFuture;
 import com.google.api.gax.batching.BatchingSettings;
+import com.google.api.gax.batching.FlowControlSettings;
+import com.google.api.gax.batching.FlowController;
 import com.google.api.gax.retrying.RetrySettings;
 import com.google.cloud.pubsub.v1.Publisher;
 import com.google.common.annotations.VisibleForTesting;
@@ -48,7 +50,6 @@ import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.header.ConnectHeaders;
 import org.apache.kafka.connect.header.Header;
-import org.apache.kafka.connect.header.Headers;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 import org.slf4j.Logger;
@@ -71,6 +72,8 @@ public class CloudPubSubSinkTask extends SinkTask {
   private String messageBodyName;
   private long maxBufferSize;
   private long maxBufferBytes;
+  private long maxOutstandingRequestBytes;
+  private long maxOutstandingMessages;
   private int maxDelayThresholdMs;
   private int maxRequestTimeoutMs;
   private int maxTotalTimeoutMs;
@@ -80,6 +83,8 @@ public class CloudPubSubSinkTask extends SinkTask {
   private OrderingKeySource orderingKeySource;
   private ConnectorCredentialsProvider gcpCredentialsProvider;
   private com.google.cloud.pubsub.v1.Publisher publisher;
+
+
 
   /** Holds a list of the publishing futures that have not been processed for a single partition. */
   private class OutstandingFuturesForPartition {
@@ -115,6 +120,10 @@ public class CloudPubSubSinkTask extends SinkTask {
     cpsEndpoint = validatedProps.get(ConnectorUtils.CPS_ENDPOINT).toString();
     maxBufferSize = (Integer) validatedProps.get(CloudPubSubSinkConnector.MAX_BUFFER_SIZE_CONFIG);
     maxBufferBytes = (Long) validatedProps.get(CloudPubSubSinkConnector.MAX_BUFFER_BYTES_CONFIG);
+    maxOutstandingRequestBytes =
+        (Long) validatedProps.get(CloudPubSubSinkConnector.MAX_OUTSTANDING_REQUEST_BYTES);
+    maxOutstandingMessages =
+        (Long) validatedProps.get(CloudPubSubSinkConnector.MAX_OUTSTANDING_MESSAGES);
     maxDelayThresholdMs =
         (Integer) validatedProps.get(CloudPubSubSinkConnector.MAX_DELAY_THRESHOLD_MS);
     maxRequestTimeoutMs =
@@ -392,6 +401,11 @@ public class CloudPubSubSinkTask extends SinkTask {
                     .setDelayThreshold(Duration.ofMillis(maxDelayThresholdMs))
                     .setElementCountThreshold(maxBufferSize)
                     .setRequestByteThreshold(maxBufferBytes)
+                    .setFlowControlSettings(FlowControlSettings.newBuilder()
+                        .setMaxOutstandingRequestBytes(maxOutstandingRequestBytes)
+                        .setMaxOutstandingElementCount(maxOutstandingMessages)
+                        .setLimitExceededBehavior(FlowController.LimitExceededBehavior.Block)
+                        .build())
                     .build())
             .setRetrySettings(
                 RetrySettings.newBuilder()
